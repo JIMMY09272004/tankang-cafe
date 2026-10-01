@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}{{ brand.name }} | 咖啡・手作甜點{% endblock %}
+{% block body_class %}public-page home-page{% endblock %}
+
+{% block content %}
+{% set hero_slides = [
+    {
+        'image': 'buna-night-hero.webp',
+        'title': brand.name,
+        'copy': '點杯咖啡，配一份喜歡的甜點。一個人坐坐，或和朋友聊聊，今天就留點時間給自己。',
+        'label': '淡江咖啡館'
+    },
+    {
+        'image': 'buna-coffee-gold.webp',
+        'title': '咖啡與飲品',
+        'copy': '喜歡奶香，試試招牌拿鐵；想喝清爽一點，有手沖和冷萃。依今天的心情選一杯。',
+        'label': '推薦飲品'
+    },
+    {
+        'image': 'buna-delicacies.webp',
+        'title': '甜點與輕食',
+        'copy': '焦糖布丁的微苦甜香、可頌的酥脆奶油香，都很適合配咖啡。找個位子，慢慢吃。',
+        'label': '甜點輕食'
+    }
+] %}
+
+<section class="buna-hero" data-hero>
+    <div class="hero-slides">
+        {% for slide in hero_slides %}
+        <article class="hero-slide {% if loop.first %}is-active{% endif %}" data-hero-slide style="--hero-bg: url('{{ url_for('static', filename='images/' ~ slide.image) }}')">
+            <div class="hero-orbit" data-parallax="0.12"></div>
+            <div class="hero-content" data-reveal>
+                <h1 data-edit-key="home.hero.{{ loop.index0 }}.title">{{ ed('home.hero.' ~ loop.index0 ~ '.title', slide.title) }}</h1>
+                <p data-edit-key="home.hero.{{ loop.index0 }}.copy">{{ ed('home.hero.' ~ loop.index0 ~ '.copy', slide['copy']) }}</p>
+                <div class="hero-actions">
+                    <a class="button glass" href="{{ url_for('shop') }}">查看菜單</a>
+                    {% if pages_mode %}
+                    <a class="button primary" href="#story">品牌故事</a>
+                    {% else %}
+                    <a class="button primary" href="{{ url_for('reservation') }}">預約訂位</a>
+                    {% endif %}
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    <div class="hero-dots" aria-label="首頁輪播">
+        {% for slide in hero_slides %}
+        <button class="{% if loop.first %}is-active{% endif %}" type="button" data-hero-dot="{{ loop.index0 }}">
+            <span>{{ '0' ~ loop.index }}</span>
+            <b>{{ slide.label }}</b>
+        </button>
+        {% endfor %}
+    </div>
+    <a class="hero-scroll" href="#story">Scroll</a>
+</section>
+
+<section class="story-section" id="story">
+    <div class="story-copy" data-reveal>
+        <span class="section-kicker" data-edit-key="home.story.kicker">{{ ed('home.story.kicker', brand.english_name) }}</span>
+        <h2 data-edit-key="home.story.title">{{ ed('home.story.title', site_content.hero.title) }}</h2>
+        <p data-edit-key="home.story.copy">{{ ed('home.story.copy', site_content.hero['copy']) }}</p>
+    </div>
+    <div class="story-points">
+        {% for item in site_content.quality_points %}
+        <article data-reveal data-reveal-delay="{{ loop.index0 }}">
+            <span data-edit-key="home.quality_points.{{ loop.index0 }}.number">{{ ed('home.quality_points.' ~ loop.index0 ~ '.number', '0' ~ loop.index) }}</span>
+            <h3 data-edit-key="home.quality_points.{{ loop.index0 }}.title">{{ ed('home.quality_points.' ~ loop.index0 ~ '.title', item.title) }}</h3>
+            <p data-edit-key="home.quality_points.{{ loop.index0 }}.copy">{{ ed('home.quality_points.' ~ loop.index0 ~ '.copy', item['copy']) }}</p>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="news-stage" id="news">
+    <div class="section-heading" data-reveal>
+        <span data-edit-key="home.news.kicker">{{ ed('home.news.kicker', 'Latest News') }}</span>
+        <h2 data-edit-key="home.news.title">{{ ed('home.news.title', '近期消息') }}</h2>
+        <a class="text-link" href="{{ url_for('news') }}">全部消息</a>
+    </div>
+    <div class="news-rail" data-carousel>
+        <button class="rail-arrow rail-prev" type="button" data-carousel-prev aria-label="上一則">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 5l-7 7 7 7"/></svg>
+        </button>
+        <div class="news-track" data-carousel-track>
+            {% for item in latest_news %}
+            <article class="news-card" data-reveal data-reveal-delay="{{ loop.index0 }}">
+                <time>{{ item.created_at[:10] }}</time>
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.body[:92] }}{% if item.body|length > 92 %}...{% endif %}</p>
+                <a href="{{ url_for('news_detail', announcement_id=item.id) }}">閱讀更多</a>
+            </article>
+            {% else %}
+            <article class="news-card">
+                <time>2026</time>
+                <h3>店內消息準備中</h3>
+                <p>新的豆單與活動會在這裡公布，先看看菜單吧。</p>
+                <a href="{{ url_for('shop') }}">查看菜單</a>
+            </article>
+            {% endfor %}
+        </div>
+        <button class="rail-arrow rail-next" type="button" data-carousel-next aria-label="下一則">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5l7 7-7 7"/></svg>
+        </button>
+    </div>
+</section>
+
+<section class="coffee-stage" id="menu">
+    <div class="coffee-media" data-reveal>
+        <img src="{{ url_for('static', filename='images/buna-coffee-gold.webp') }}" alt="黑金咖啡與咖啡器具">
+        <div class="gold-plate" data-parallax="0.08"></div>
+    </div>
+    <div class="coffee-copy" data-reveal data-reveal-delay="1">
+        <span class="section-kicker" data-edit-key="home.coffee.kicker">{{ ed('home.coffee.kicker', 'Coffee / Drinks') }}</span>
+        <h2 data-edit-key="home.coffee.title">{{ ed('home.coffee.title', '今天想喝哪一杯？') }}</h2>
+        <p data-edit-key="home.coffee.copy">{{ ed('home.coffee.copy', '招牌拿鐵帶著焦糖與堅果香，手沖能喝到不同咖啡豆的風味。想喝冰的，也有口感柔順的冷萃。') }}</p>
+        <a class="button glass" href="{{ url_for('shop') }}">瀏覽完整菜單</a>
+    </div>
+    <div class="menu-rail" data-carousel data-reveal>
+        <div class="menu-track" data-carousel-track>
+            {% for product in featured_products %}
+            <article class="menu-tile">
+                <img src="{{ product.image_url }}" alt="{{ product.name }}">
+                <span>{{ product.category }}</span>
+                <h3>{{ product.name }}</h3>
+                <p>NT${{ product.price }}</p>
+                <a href="{{ url_for('product_detail', slug=product.slug) }}">查看詳情</a>
+            </article>
+            {% endfor %}
+        </div>
+        <div class="rail-actions">
+            <button class="rail-arrow" type="button" data-carousel-prev aria-label="上一組"><svg viewBox="0 0 24 24"><path d="M15.5 5l-7 7 7 7"/></svg></button>
+            <button class="rail-arrow" type="button" data-carousel-next aria-label="下一組"><svg viewBox="0 0 24 24"><path d="M8.5 5l7 7-7 7"/></svg></button>
+        </div>
+    </div>
+</section>
+
+<section class="delicacies-stage">
+    <div class="delicacies-panel" data-reveal>
+        <span class="section-kicker" data-edit-key="home.delicacies.kicker">{{ ed('home.delicacies.kicker', 'Delicacies') }}</span>
+        <h2 data-edit-key="home.delicacies.title">{{ ed('home.delicacies.title', '咖啡旁邊，留個位子給甜點') }}</h2>
+        <p data-edit-key="home.delicacies.copy">{{ ed('home.delicacies.copy', '焦糖布丁口感滑順，抹茶可頌帶著茶香與奶油香。季節點心依當日供應，來之前也可以先問問我們。') }}</p>
+        <div class="delicacy-list">
+            <span data-edit-key="home.delicacies.item0">{{ ed('home.delicacies.item0', '抹茶奶霜可頌 / NT$135') }}</span>
+            <span data-edit-key="home.delicacies.item1">{{ ed('home.delicacies.item1', '昭和焦糖布丁 / NT$120') }}</span>
+            <span data-edit-key="home.delicacies.item2">{{ ed('home.delicacies.item2', '季節甜點盤 / 依現場供應') }}</span>
+        </div>
+    </div>
+    <img src="{{ url_for('static', filename='images/buna-delicacies.webp') }}" alt="咖啡館甜點與料理拼貼" data-reveal data-reveal-delay="1">
+</section>
+
+<section class="reservation-band">
+    {% if pages_mode %}
+    <div data-reveal>
+        <span class="section-kicker">Coffee &amp; Dessert</span>
+        <h2>一杯咖啡，一份喜歡的甜點</h2>
+        <p>拿鐵的奶香、手沖的清爽、布丁的焦糖味。看看菜單，找找今天想吃什麼。</p>
+    </div>
+    <div class="reservation-actions" data-reveal data-reveal-delay="1">
+        <a class="button primary" href="{{ url_for('shop') }}">查看菜單</a>
+        <a class="button glass" href="{{ url_for('news') }}">近期消息</a>
+    </div>
+    {% else %}
+    <div data-reveal>
+        <span class="section-kicker" data-edit-key="home.reservation.kicker">{{ ed('home.reservation.kicker', 'Reservation') }}</span>
+        <h2 data-edit-key="home.reservation.title">{{ ed('home.reservation.title', '約好時間，來喝杯咖啡') }}</h2>
+        <p data-edit-key="home.reservation.copy">{{ ed('home.reservation.copy', '留下日期、時間和人數，我們會回覆座位安排。收到確認後，訂位才算完成。') }}</p>
+    </div>
+    <div class="reservation-actions" data-reveal data-reveal-delay="1">
+        <a class="button primary" href="{{ url_for('reservation') }}">立即訂位</a>
+        <a class="button glass" href="{{ url_for('contact') }}">聯絡我們</a>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

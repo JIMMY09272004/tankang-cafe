@@ -1,0 +1,10 @@
+{
+  "name": "mellowday-cafe-security-build",
+  "private": true,
+  "scripts": {
+    "build:assets": "python build_assets.py"
+  },
+  "devDependencies": {
+    "javascript-obfuscator": "^4.1.1"
+  }
+}

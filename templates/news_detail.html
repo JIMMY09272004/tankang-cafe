@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}{{ item.title }} - {{ brand.name }}{% endblock %}
+{% block body_class %}public-page news-detail-page{% endblock %}
+
+{% block content %}
+<article class="article-page" data-reveal>
+    <a class="text-link" href="{{ url_for('news') }}">回到最新消息</a>
+    <time>{{ item.created_at[:10] }}</time>
+    {% if item.pinned %}<span class="pill news-pin">置頂消息</span>{% endif %}
+    <h1>{{ item.title }}</h1>
+    <p>{{ item.body }}</p>
+</article>
+
+{% if others %}
+<section class="related-section">
+    <div class="section-heading" data-reveal>
+        <span>More News</span>
+        <h2>其他消息</h2>
+    </div>
+    <div class="news-track compact-news">
+        {% for other in others %}
+        <article class="news-card" data-reveal data-reveal-delay="{{ loop.index0 }}">
+            <time>{{ other.created_at[:10] }}</time>
+            <h3>{{ other.title }}</h3>
+            <p>{{ other.body[:80] }}{% if other.body|length > 80 %}...{% endif %}</p>
+            <a href="{{ url_for('news_detail', announcement_id=other.id) }}">閱讀更多</a>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

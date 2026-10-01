@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - {{ brand.name }}{% endblock %}
+{% block body_class %}public-page detail-page{% endblock %}
+
+{% block content %}
+<section class="product-detail-hero">
+    <div class="detail-media" data-reveal>
+        <img src="{{ product.image_url }}" alt="{{ product.name }}">
+    </div>
+    <div class="detail-copy" data-reveal data-reveal-delay="1">
+        <a class="text-link" href="{{ url_for('shop') }}">回到菜單</a>
+        <span class="section-kicker">{{ product.category }}</span>
+        <h1>{{ product.name }}</h1>
+        <p>{{ product.description }}</p>
+        <strong class="detail-price">NT${{ product.price }}</strong>
+        <div class="detail-actions">
+            {% if pages_mode %}
+            <a class="button glass" href="{{ url_for('shop') }}">瀏覽菜單</a>
+            {% else %}
+            <a class="button primary" href="{{ url_for('reservation') }}">預約訂位</a>
+            <a class="button glass" href="{{ url_for('contact') }}">詢問供應</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="detail-panels">
+    <article data-reveal>
+        <h2>風味亮點</h2>
+        <ul>
+            {% for item in product.benefits %}
+                <li>{{ item }}</li>
+            {% else %}
+                <li>想了解這款餐點，歡迎詢問店員。</li>
+            {% endfor %}
+        </ul>
+    </article>
+    <article data-reveal data-reveal-delay="1">
+        <h2>內容與備註</h2>
+        <ul>
+            {% for item in product.ingredients %}
+                <li>{{ item }}</li>
+            {% else %}
+                <li>若有特殊飲食需求，歡迎訂位時備註。</li>
+            {% endfor %}
+        </ul>
+    </article>
+</section>
+
+{% if related_products %}
+<section class="related-section">
+    <div class="section-heading" data-reveal>
+        <span>More Taste</span>
+        <h2>你可能也會喜歡</h2>
+    </div>
+    <div class="related-grid">
+        {% for item in related_products %}
+        <article class="menu-tile" data-reveal data-reveal-delay="{{ loop.index0 }}">
+            <img src="{{ item.image_url }}" alt="{{ item.name }}">
+            <span>{{ item.category }}</span>
+            <h3>{{ item.name }}</h3>
+            <p>NT${{ item.price }}</p>
+            <a href="{{ url_for('product_detail', slug=item.slug) }}">查看詳情</a>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

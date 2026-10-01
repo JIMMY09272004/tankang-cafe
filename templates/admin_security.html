@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}安全管理 - {{ brand.name }}{% endblock %}
+{% block body_class %}admin-page{% endblock %}
+
+{% set state_labels = {'manual': '手動封鎖', 'blocked': '自動封鎖', 'normal': '正常'} %}
+{% set event_labels = {
+    'not_found': '404 掃描',
+    'sensitive_path': '敏感路徑',
+    'admin_probe': '後台探測',
+    'login_failed': '登入失敗',
+    'ip_auto_block': '自動封鎖',
+    'turnstile_failed': '驗證失敗',
+    'csrf_failed': 'CSRF 失敗',
+    'rate_limit_register': '註冊限制',
+    'rate_limit_forgot_password': '忘記密碼限制',
+    'rate_limit_reservation': '訂位限制',
+    'rate_limit_contact': '聯絡表單限制'
+} %}
+
+{% block content %}
+<section class="admin-hero" data-reveal>
+    <div>
+        <span class="section-kicker">Security Center</span>
+        <h1>安全監控與 IP 防護</h1>
+        <p>登入失敗、掃描路徑、表單限制與後台探測會寫入紀錄；達到門檻時會透過 SMTP 寄出告警。</p>
+    </div>
+</section>
+
+<section class="admin-panel" data-reveal>
+    <div class="panel-heading">
+        <h2>手動封鎖 IP</h2>
+        <span class="muted small-text">目前連線位址：{{ my_ip }}（{{ "IPv6" if my_ip_kind == "ipv6" else "IPv4" }}{{ "" if my_ip_public else "・內網，不記錄" }}）</span>
+    </div>
+    <form class="status-form" method="post" action="{{ url_for('admin_ip_block') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="text" name="ip" placeholder="IPv4 或 IPv6，例如 203.0.113.5 或 2001:db8::1" maxlength="45" required>
+        <button class="button danger" type="submit">封鎖位址</button>
+    </form>
+    <p class="muted small-text">系統會在同一 IP 登入失敗達 {{ max_failed }} 次時自動封鎖 {{ block_minutes }} 分鐘。</p>
+</section>
+
+<section class="admin-panel" data-reveal>
+    <div class="panel-heading">
+        <h2>最近 24 小時事件摘要</h2>
+    </div>
+    {% if security_summary %}
+    <div class="table-scroll">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>事件</th>
+                    <th>次數</th>
+                    <th>IP 數</th>
+                    <th>最後時間</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in security_summary %}
+                <tr>
+                    <td>{{ event_labels.get(item.event_type, item.event_type) }}</td>
+                    <td>{{ item.count }}</td>
+                    <td>{{ item.ip_count }}</td>
+                    <td class="small-text muted">{{ item.last_seen }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h2>目前沒有安全事件</h2>
+        <p>最近 24 小時沒有被記錄的掃描、限制或登入異常。</p>
+    </div>
+    {% endif %}
+</section>
+
+<section class="admin-panel" data-reveal>
+    <div class="panel-heading filter-bar">
+        <h2>IP 封鎖紀錄</h2>
+        <input type="search" placeholder="搜尋 IP" data-admin-search>
+    </div>
+
+    {% if ip_rows %}
+    <div class="table-scroll">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>IPv4</th>
+                    <th>IPv6</th>
+                    <th>狀態</th>
+                    <th>失敗次數</th>
+                    <th>剩餘封鎖</th>
+                    <th>最後嘗試</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in ip_rows %}
+                <tr data-admin-product data-name="{{ item.ip }}">
+                    <td>{% if item.kind == 'ipv4' %}<strong>{{ item.ip }}</strong>{% else %}<span class="muted">—</span>{% endif %}</td>
+                    <td>{% if item.kind == 'ipv6' %}<strong>{{ item.ip }}</strong>{% else %}<span class="muted">—</span>{% endif %}</td>
+                    <td><span class="pill status-pill state-{{ item.state }}">{{ state_labels[item.state] }}</span></td>
+                    <td>{{ item.failed_attempts }} / {{ max_failed }}</td>
+                    <td>
+                        {% if item.state == 'blocked' %}
+                            {{ item.blocked_minutes_left }} 分鐘
+                        {% elif item.state == 'manual' %}
+                            持續封鎖
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td class="small-text muted">{{ item.last_attempt_at or "-" }}</td>
+                    <td>
+                        <div class="card-actions">
+                            {% if item.state == 'normal' %}
+                            <form method="post" action="{{ url_for('admin_ip_block') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="ip" value="{{ item.ip }}">
+                                <button class="button danger" type="submit">封鎖</button>
+                            </form>
+                            {% else %}
+                            <form method="post" action="{{ url_for('admin_ip_unblock') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="ip" value="{{ item.ip }}">
+                                <button class="button primary" type="submit">解除</button>
+                            </form>
+                            {% endif %}
+                            <form method="post" action="{{ url_for('admin_ip_delete', ip=item.ip) }}" onsubmit="return confirm('確定刪除此 IP 紀錄？');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button class="button glass" type="submit">刪除</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h2>目前沒有 IP 紀錄</h2>
+        <p>登入失敗或手動封鎖後，紀錄會出現在這裡。</p>
+    </div>
+    {% endif %}
+</section>
+
+<section class="admin-panel" data-reveal>
+    <div class="panel-heading">
+        <h2>最近安全事件</h2>
+        <span class="muted small-text">最多顯示最近 80 筆</span>
+    </div>
+    {% if security_events %}
+    <div class="table-scroll">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>時間</th>
+                    <th>事件</th>
+                    <th>IPv4</th>
+                    <th>IPv6</th>
+                    <th>路徑</th>
+                    <th>方法</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in security_events %}
+                <tr>
+                    <td class="small-text muted">{{ event.created_at_local }}</td>
+                    <td>{{ event_labels.get(event.event_type, event.event_type) }}</td>
+                    <td>{% if event.kind == 'ipv4' %}{{ event.ip }}{% else %}<span class="muted">—</span>{% endif %}</td>
+                    <td>{% if event.kind == 'ipv6' %}{{ event.ip }}{% else %}<span class="muted">—</span>{% endif %}</td>
+                    <td class="small-text">{{ event.path or "-" }}</td>
+                    <td>{{ event.method or "-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h2>尚未記錄事件</h2>
+        <p>404 掃描、後台探測、Turnstile 失敗與表單限制會出現在這裡。</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

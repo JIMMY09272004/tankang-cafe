@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}會員資料 - {{ brand.name }}{% endblock %}
+{% block body_class %}auth-page profile-page{% endblock %}
+
+{% block content %}
+<section class="page-hero compact">
+    <div data-reveal>
+        <span class="section-kicker">Member Profile</span>
+        <h1>管理會員資料</h1>
+        <p>你可以更新姓名、生日與 Email。若更換 Email，系統會重新寄送驗證信並要求再次登入。</p>
+    </div>
+</section>
+
+<section class="form-layout profile-layout">
+    <form class="form-panel" method="post" action="{{ url_for('profile') }}" data-reveal>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="profile">
+        <div class="form-heading">
+            <span class="section-kicker">Profile</span>
+            <h2>基本資料</h2>
+        </div>
+        <label><span>姓名</span><input type="text" name="full_name" value="{{ member.full_name }}" required maxlength="60"></label>
+        <label><span>生日</span><input type="date" name="birthday" value="{{ member.birthday }}" required></label>
+        <label><span>Email</span><input type="email" name="email" value="{{ member.email }}" required maxlength="120"></label>
+        <p class="help-text">
+            Email 狀態：{% if member.email_verified_at %}已驗證{% else %}尚未驗證，更新後請至信箱完成驗證{% endif %}
+        </p>
+        <button class="button primary full" type="submit">儲存資料</button>
+    </form>
+    <form class="form-panel" method="post" action="{{ url_for('profile') }}" data-reveal data-reveal-delay="1">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="password">
+        <div class="form-heading">
+            <span class="section-kicker">Password</span>
+            <h2>更新密碼</h2>
+        </div>
+        <label><span>目前密碼</span><input type="password" name="current_password" required autocomplete="current-password"></label>
+        <label><span>新密碼</span><input type="password" name="password" required autocomplete="new-password"></label>
+        <label><span>新密碼確認</span><input type="password" name="password_confirm" required autocomplete="new-password"></label>
+        <p class="help-text">密碼至少 8 碼，且需包含大寫英文、小寫英文與數字。</p>
+        <button class="button glass full" type="submit">更新密碼</button>
+    </form>
+</section>
+{% endblock %}

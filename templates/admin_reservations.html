@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}訂位管理 - {{ brand.name }}{% endblock %}
+{% block body_class %}admin-page{% endblock %}
+
+{% set status_labels = {'new': '待確認', 'confirmed': '已確認', 'seated': '已入座', 'cancelled': '已取消'} %}
+
+{% block content %}
+<section class="admin-hero" data-reveal>
+    <div>
+        <span class="section-kicker">Reservation Management</span>
+        <h1>訂位管理</h1>
+        <p>查看訂位需求、更新狀態或刪除無效紀錄。</p>
+    </div>
+</section>
+
+<section class="admin-panel">
+    <div class="panel-heading filter-bar">
+        <div class="status-filter">
+            <a class="chip {% if not status_filter %}active{% endif %}" href="{{ url_for('admin_reservations') }}">全部</a>
+            {% for status in statuses %}
+                <a class="chip {% if status_filter == status %}active{% endif %}" href="{{ url_for('admin_reservations', status=status) }}">{{ status_labels[status] }}</a>
+            {% endfor %}
+        </div>
+        <input type="search" placeholder="搜尋姓名或電話" data-admin-search>
+    </div>
+
+    {% if reservations %}
+    <div class="order-list">
+        {% for item in reservations %}
+        <article class="order-card" data-reveal data-admin-product data-name="{{ item.name }} {{ item.phone }}">
+            <div class="order-topline">
+                <div>
+                    <span class="pill status-pill status-{{ item.status }}">{{ status_labels[item.status] }}</span>
+                    <h2>{{ item.reserved_date }}，{{ item.reserved_time }}</h2>
+                    <p>{{ item.name }}，{{ item.phone }}{% if item.email %}，{{ item.email }}{% endif %}</p>
+                </div>
+                <strong>{{ item.party_size }} 人</strong>
+            </div>
+            {% if item.note %}<p class="muted">備註：{{ item.note }}</p>{% endif %}
+            <p class="muted small-text">建立時間：{{ item.created_at }}</p>
+            <div class="card-actions">
+                <form class="status-form" method="post" action="{{ url_for('admin_reservation_status', reservation_id=item.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <select name="status">
+                        {% for status in statuses %}
+                            <option value="{{ status }}" {% if item.status == status %}selected{% endif %}>{{ status_labels[status] }}</option>
+                        {% endfor %}
+                    </select>
+                    <button class="button glass" type="submit">更新狀態</button>
+                </form>
+                <form method="post" action="{{ url_for('admin_reservation_delete', reservation_id=item.id) }}" onsubmit="return confirm('確定要刪除這筆訂位紀錄嗎？');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="button danger" type="submit">刪除</button>
+                </form>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h2>目前沒有訂位紀錄</h2>
+        <p>前台送出的訂位需求會顯示在這裡。</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}公告管理 - {{ brand.name }}{% endblock %}
+{% block body_class %}admin-page{% endblock %}
+
+{% block content %}
+<section class="admin-hero" data-reveal>
+    <div>
+        <span class="section-kicker">Announcements</span>
+        <h1>公告管理</h1>
+        <p>管理前台最新消息，可設定置頂與發布狀態。</p>
+    </div>
+</section>
+
+<section class="admin-layout">
+    <form class="form-panel sticky-panel" method="post" action="{{ url_for('admin_announcements') }}" data-reveal>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <h2 class="form-title">新增公告</h2>
+        <label><span>標題</span><input type="text" name="title" required maxlength="100" placeholder="例如：季節豆單更新"></label>
+        <label><span>內容</span><textarea name="body" rows="5" required maxlength="2000"></textarea></label>
+        <label class="check-field"><input type="checkbox" name="pinned" value="1"> <span>置頂公告</span></label>
+        <label class="check-field"><input type="checkbox" name="published" value="1" checked> <span>發布到前台</span></label>
+        <button class="button primary full" type="submit">發布公告</button>
+    </form>
+
+    <div class="admin-panel product-admin-panel" data-reveal data-reveal-delay="1">
+        <div class="panel-heading">
+            <h2>目前公告</h2>
+            <input type="search" placeholder="搜尋公告標題" data-admin-search>
+        </div>
+        {% if announcements %}
+        <div class="order-list">
+            {% for item in announcements %}
+            <article class="order-card" data-admin-product data-name="{{ item.title }}">
+                <div class="order-topline">
+                    <div>
+                        <span class="pill status-pill {{ 'status-confirmed' if item.published else 'status-archived' }}">{{ '已發布' if item.published else '未發布' }}</span>
+                        {% if item.pinned %}<span class="pill news-pin">置頂</span>{% endif %}
+                        <h2>{{ item.title }}</h2>
+                        <p class="muted small-text">建立：{{ item.created_at[:16] }}</p>
+                    </div>
+                </div>
+                <details>
+                    <summary>編輯公告</summary>
+                    <form class="inline-edit-form" method="post" action="{{ url_for('admin_announcement_update', announcement_id=item.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <label><span>標題</span><input type="text" name="title" value="{{ item.title }}" required maxlength="100"></label>
+                        <label><span>內容</span><textarea name="body" rows="4" required maxlength="2000">{{ item.body }}</textarea></label>
+                        <label class="check-field"><input type="checkbox" name="pinned" value="1" {% if item.pinned %}checked{% endif %}> <span>置頂</span></label>
+                        <label class="check-field"><input type="checkbox" name="published" value="1" {% if item.published %}checked{% endif %}> <span>發布</span></label>
+                        <button class="button primary" type="submit">儲存修改</button>
+                    </form>
+                </details>
+                <form method="post" action="{{ url_for('admin_announcement_delete', announcement_id=item.id) }}" onsubmit="return confirm('確定要刪除這則公告嗎？');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="button danger" type="submit">刪除</button>
+                </form>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <h2>尚未新增公告</h2>
+            <p>新增後會顯示在前台最新消息。</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

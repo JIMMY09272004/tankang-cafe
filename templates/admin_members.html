@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}會員管理 - {{ brand.name }}{% endblock %}
+{% block body_class %}admin-page{% endblock %}
+
+{% block content %}
+<section class="admin-hero">
+    <div>
+        <span class="section-kicker">Member Management</span>
+        <h1>會員管理</h1>
+        <p>查看會員註冊資料、啟用狀態、Email 驗證狀態，並可寄送通知、重設密碼或刪除會員帳號。</p>
+    </div>
+</section>
+
+<section class="admin-layout member-admin-layout">
+    <aside class="admin-panel sticky-panel">
+        <div class="panel-heading">
+            <h2>一鍵群發</h2>
+        </div>
+        <form class="inline-edit-form" method="post" action="{{ url_for('admin_members_send_bulk_mail') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label>
+                <span>信件主旨</span>
+                <input type="text" name="subject" maxlength="120" required placeholder="例如：本週新品與營業時間通知">
+            </label>
+            <label>
+                <span>信件內容</span>
+                <textarea name="body" rows="8" maxlength="3000" required placeholder="輸入要寄給所有啟用會員的內容。"></textarea>
+            </label>
+            <button class="button primary" type="submit">寄給所有啟用會員</button>
+            <p class="muted small-text">只會寄給角色為 user、狀態啟用且有 Email 的會員。</p>
+        </form>
+    </aside>
+
+    <section class="admin-panel member-admin-panel">
+        <div class="panel-heading">
+            <h2>會員列表</h2>
+            <input type="search" placeholder="搜尋姓名、帳號或 Email" data-admin-search>
+        </div>
+        <div class="member-list">
+            {% for member in members %}
+            <article class="member-card" data-admin-product data-name="{{ member.full_name }} {{ member.username }} {{ member.email }}">
+                <div class="member-summary">
+                    <div>
+                        <span class="pill">
+                            {{ member.role }} · {{ "啟用" if member.is_active else "停用" }} · {{ "Email 已驗證" if member.email_verified_at else "Email 未驗證" }}
+                        </span>
+                        <h2>{{ member.full_name or member.display_name }}</h2>
+                        <p>{{ member.username }} · {{ member.email or "未填 Email" }}</p>
+                        <p class="muted">生日 {{ member.birthday or "未填寫" }} · 註冊 {{ member.created_at }}</p>
+                    </div>
+                </div>
+
+                <details>
+                    <summary>編輯會員資料</summary>
+                    <form class="inline-edit-form" method="post" action="{{ url_for('admin_member_update', member_id=member.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="form-row">
+                            <label><span>姓名</span><input type="text" name="full_name" value="{{ member.full_name }}" required maxlength="60"></label>
+                            <label><span>生日</span><input type="date" name="birthday" value="{{ member.birthday }}" required></label>
+                        </div>
+                        <label><span>Email</span><input type="email" name="email" value="{{ member.email }}" required maxlength="120"></label>
+                        <label>
+                            <span>帳號狀態</span>
+                            <select name="is_active">
+                                <option value="1" {% if member.is_active %}selected{% endif %}>啟用</option>
+                                <option value="0" {% if not member.is_active %}selected{% endif %}>停用</option>
+                            </select>
+                        </label>
+                        <button class="button primary" type="submit">儲存會員資料</button>
+                    </form>
+                </details>
+
+                <details>
+                    <summary>寄送會員通知</summary>
+                    <form class="inline-edit-form" method="post" action="{{ url_for('admin_member_send_mail', member_id=member.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <label>
+                            <span>信件主旨</span>
+                            <input type="text" name="subject" maxlength="120" required placeholder="例如：訂位提醒">
+                        </label>
+                        <label>
+                            <span>信件內容</span>
+                            <textarea name="body" rows="6" maxlength="3000" required placeholder="輸入要寄給這位會員的內容。"></textarea>
+                        </label>
+                        <button class="button glass" type="submit">寄信給這位會員</button>
+                    </form>
+                </details>
+
+                <div class="card-actions member-actions">
+                    <form method="post" action="{{ url_for('admin_member_send_reset', member_id=member.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="button glass" type="submit">寄重設密碼信</button>
+                    </form>
+                    {% if member.role != "admin" %}
+                    <form method="post" action="{{ url_for('admin_member_delete', member_id=member.id) }}" onsubmit="return confirm('確定要刪除這個會員帳號？歷史訂單會保留，但會員將無法再登入。');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="button danger" type="submit">刪除會員</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </article>
+            {% else %}
+            <div class="empty-state">
+                <h2>目前沒有會員</h2>
+                <p>新會員註冊後會顯示在這裡。</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</section>
+{% endblock %}

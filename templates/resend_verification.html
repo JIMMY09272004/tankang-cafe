@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}重新寄送驗證信 - {{ brand.name }}{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<section class="auth-shell">
+    <div class="auth-visual" data-reveal>
+        <span class="section-kicker">Resend Verification</span>
+        <h1>重新寄送 Email 驗證信。</h1>
+        <p>輸入註冊時使用的 Email。若帳號尚未驗證，系統會再次寄出驗證信。</p>
+    </div>
+    <form class="auth-card" method="post" action="{{ url_for('resend_verification') }}" data-reveal data-reveal-delay="1">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-heading">
+            <span class="section-kicker">Verification</span>
+            <h2>重新寄送驗證信</h2>
+        </div>
+        <label><span>Email</span><input type="email" name="email" required maxlength="120"></label>
+        <button class="button primary full" type="submit">寄送驗證信</button>
+        <div class="auth-links"><a href="{{ url_for('login') }}">返回登入</a></div>
+    </form>
+</section>
+{% endblock %}

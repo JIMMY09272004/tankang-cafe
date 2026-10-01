@@ -1,0 +1,47 @@
+﻿{% extends "base.html" %}
+
+{% block title %}聯絡我們 - {{ brand.name }}{% endblock %}
+{% block body_class %}public-page form-page contact-page{% endblock %}
+
+{% block content %}
+<section class="page-hero contact-hero">
+    <div data-reveal>
+        <span class="section-kicker">Contact</span>
+        <h1>聯絡我們</h1>
+        <p>想問當天的甜點、座位安排，或聊聊包場與合作？留下訊息和聯絡方式，我們會再回覆你。</p>
+    </div>
+</section>
+
+<section class="form-layout">
+    <form class="form-panel" method="post" action="{{ url_for('contact') }}" data-reveal>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-heading">
+            <span class="section-kicker">Message</span>
+            <h2>留下訊息</h2>
+        </div>
+        <div class="form-row">
+            <label><span>姓名</span><input type="text" name="name" required maxlength="60" autocomplete="name"></label>
+            <label><span>Email</span><input type="email" name="email" maxlength="120" autocomplete="email"></label>
+        </div>
+        <label><span>電話</span><input type="tel" name="phone" maxlength="20" autocomplete="tel"></label>
+        <label><span>主旨</span><input type="text" name="subject" maxlength="120" placeholder="訂位、包場或合作詢問"></label>
+        <label><span>訊息內容</span><textarea name="body" rows="6" required maxlength="1000"></textarea></label>
+        {% if turnstile_enabled %}
+            <div class="turnstile-wrap"><div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}" data-action="contact" data-theme="dark"></div></div>
+        {% endif %}
+        <button class="button primary full" type="submit">送出訊息</button>
+    </form>
+
+    <aside class="info-panel" data-reveal data-reveal-delay="1">
+        <span class="section-kicker" data-edit-key="contact.info.kicker">{{ ed('contact.info.kicker', 'Visit Us') }}</span>
+        <h2 data-edit-key="contact.info.title">{{ ed('contact.info.title', '店家資訊') }}</h2>
+        <ul>
+            <li><span data-edit-key="contact.info.hours">{{ ed('contact.info.hours', '營業時間：11:00 至 22:00') }}</span></li>
+            <li><span data-edit-key="contact.info.address">{{ ed('contact.info.address', '地址：台北市大安區沐光路 18 號') }}</span></li>
+            <li><span data-edit-key="contact.info.email">{{ ed('contact.info.email', 'Email：hello@mellowday.local') }}</span></li>
+            <li><span data-edit-key="contact.info.phone">{{ ed('contact.info.phone', '電話：02-0000-2026') }}</span></li>
+        </ul>
+        <a class="button glass" href="{{ url_for('reservation') }}">改用訂位表單</a>
+    </aside>
+</section>
+{% endblock %}

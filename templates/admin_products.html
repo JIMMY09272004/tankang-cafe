@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}菜單管理 - {{ brand.name }}{% endblock %}
+{% block body_class %}admin-page{% endblock %}
+
+{% block content %}
+<section class="admin-hero">
+    <div>
+        <span class="section-kicker">Menu Management</span>
+        <h1>菜單管理</h1>
+        <p>管理咖啡、冷飲、甜點與輕食。下架商品仍會保留資料，之後可重新上架。</p>
+    </div>
+</section>
+
+<section class="admin-layout">
+    <form class="form-panel sticky-panel" method="post" action="{{ url_for('admin_products') }}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-heading">
+            <span class="section-kicker">New Item</span>
+            <h2>新增菜單項目</h2>
+        </div>
+        <label><span>名稱</span><input type="text" name="name" required maxlength="80"></label>
+        <label><span>Slug</span><input type="text" name="slug" maxlength="90" placeholder="未填寫會由名稱自動產生"></label>
+        <label><span>分類</span><input type="text" name="category" required maxlength="40" list="category-list"></label>
+        <label><span>描述</span><textarea name="description" rows="3" required maxlength="320"></textarea></label>
+        <div class="form-row">
+            <label><span>價格 NT$</span><input type="number" name="price" min="0" required></label>
+            <label><span>庫存</span><input type="number" name="stock" min="0" required></label>
+        </div>
+        <label><span>風味亮點</span><textarea name="benefits" rows="3" placeholder="一行一個亮點"></textarea></label>
+        <label><span>內容與備註</span><textarea name="ingredients" rows="3" placeholder="一行一個內容或備註"></textarea></label>
+        <label><span>標籤</span><input type="text" name="tags" placeholder="coffee, dessert, iced"></label>
+        <label class="check-field"><input type="checkbox" name="featured" checked> <span>設為推薦項目</span></label>
+        <label><span>圖片</span><input type="file" name="image" accept="image/png,image/jpeg,image/webp" data-image-preview></label>
+        <img class="upload-preview" src="" alt="" data-preview-target hidden>
+        <button class="button primary full" type="submit">新增項目</button>
+    </form>
+
+    <div class="admin-panel product-admin-panel">
+        <div class="panel-heading">
+            <h2>目前菜單</h2>
+            <input type="search" placeholder="搜尋名稱或分類" data-admin-search>
+        </div>
+        <div class="admin-product-list">
+            {% for product in products %}
+            <article class="admin-product-card" data-admin-product data-name="{{ product.name }} {{ product.category }}">
+                <img src="{{ product.image_url if product.image else url_for('static', filename='images/buna-coffee-gold.webp') }}" alt="{{ product.name }}">
+                <div class="admin-product-main">
+                    <span class="pill">{{ "上架中" if product.active else "已下架" }}</span>
+                    <h3>{{ product.name }}</h3>
+                    <p>{{ product.category }}，NT${{ product.price }}，庫存 {{ product.stock }}</p>
+                    <details>
+                        <summary>編輯項目</summary>
+                        <form class="inline-edit-form" method="post" action="{{ url_for('admin_product_update', product_id=product.id) }}" enctype="multipart/form-data">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <label><span>名稱</span><input type="text" name="name" value="{{ product.name }}" required maxlength="80"></label>
+                            <label><span>Slug</span><input type="text" name="slug" value="{{ product.slug }}" maxlength="90"></label>
+                            <label><span>分類</span><input type="text" name="category" value="{{ product.category }}" required maxlength="40"></label>
+                            <label><span>描述</span><textarea name="description" rows="3" required maxlength="320">{{ product.description }}</textarea></label>
+                            <div class="form-row">
+                                <label><span>價格</span><input type="number" name="price" value="{{ product.price }}" min="0" required></label>
+                                <label><span>庫存</span><input type="number" name="stock" value="{{ product.stock }}" min="0" required></label>
+                            </div>
+                            <label><span>風味亮點</span><textarea name="benefits" rows="3">{{ product.benefits|join('\n') }}</textarea></label>
+                            <label><span>內容與備註</span><textarea name="ingredients" rows="3">{{ product.ingredients|join('\n') }}</textarea></label>
+                            <label><span>標籤</span><input type="text" name="tags" value="{{ product.tags|join(', ') }}"></label>
+                            <label class="check-field"><input type="checkbox" name="featured" {% if product.featured %}checked{% endif %}> <span>推薦項目</span></label>
+                            <label><span>更新圖片</span><input type="file" name="image" accept="image/png,image/jpeg,image/webp"></label>
+                            <button class="button primary" type="submit">儲存修改</button>
+                        </form>
+                    </details>
+                </div>
+                {% if product.active %}
+                <form method="post" action="{{ url_for('admin_product_delete', product_id=product.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="button danger" type="submit">下架</button>
+                </form>
+                {% else %}
+                <form method="post" action="{{ url_for('admin_product_restore', product_id=product.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="button primary" type="submit">重新上架</button>
+                </form>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<datalist id="category-list">
+    {% for category in categories %}
+        <option value="{{ category }}">
+    {% endfor %}
+</datalist>
+{% endblock %}

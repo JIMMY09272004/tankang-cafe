@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}後台儀表板 - {{ brand.name }}{% endblock %}
+{% block body_class %}admin-page{% endblock %}
+
+{% block content %}
+<section class="admin-hero" data-reveal>
+    <div>
+        <span class="section-kicker">Admin Dashboard</span>
+        <h1>後台儀表板</h1>
+        <p>管理菜單、訂位、留言、會員與安全監控。所有管理操作都會保留基本紀錄。</p>
+    </div>
+    <a class="button primary" href="{{ url_for('admin_reservations') }}">查看訂位</a>
+</section>
+
+<section class="metric-grid">
+    <article class="metric-card" data-reveal data-reveal-delay="0">
+        <a class="metric-link" href="{{ url_for('admin_products') }}" aria-label="菜單管理"></a>
+        <span>菜單品項</span><strong data-count="{{ stats.products }}">{{ stats.products }}</strong>
+    </article>
+    <article class="metric-card" data-reveal data-reveal-delay="1">
+        <a class="metric-link" href="{{ url_for('admin_reservations', status='new') }}" aria-label="待處理訂位"></a>
+        <span>待處理訂位</span><strong data-count="{{ stats.reservations_pending }}">{{ stats.reservations_pending }}</strong>
+    </article>
+    <article class="metric-card" data-reveal data-reveal-delay="2">
+        <a class="metric-link" href="{{ url_for('admin_reservations') }}" aria-label="今日訂位"></a>
+        <span>今日訂位</span><strong data-count="{{ stats.reservations_today }}">{{ stats.reservations_today }}</strong>
+    </article>
+    <article class="metric-card" data-reveal data-reveal-delay="3">
+        <a class="metric-link" href="{{ url_for('admin_messages', status='unread') }}" aria-label="未讀留言"></a>
+        <span>未讀留言</span><strong data-count="{{ stats.messages_unread }}">{{ stats.messages_unread }}</strong>
+    </article>
+    <article class="metric-card" data-reveal data-reveal-delay="4">
+        <a class="metric-link" href="{{ url_for('admin_products') }}" aria-label="低庫存"></a>
+        <span>低庫存</span><strong data-count="{{ stats.low_stock }}">{{ stats.low_stock }}</strong>
+    </article>
+    <article class="metric-card" data-reveal data-reveal-delay="5">
+        <a class="metric-link" href="{{ url_for('admin_members') }}" aria-label="會員管理"></a>
+        <span>會員數</span><strong data-count="{{ stats.members }}">{{ stats.members }}</strong>
+    </article>
+    <article class="metric-card" data-reveal data-reveal-delay="6">
+        <a class="metric-link" href="{{ url_for('admin_security') }}" aria-label="安全管理"></a>
+        <span>安全管理</span><strong data-count="{{ stats.blocked_ips }}">{{ stats.blocked_ips }}</strong>
+    </article>
+    <article class="metric-card" data-reveal data-reveal-delay="7">
+        <a class="metric-link" href="{{ url_for('admin_announcements') }}" aria-label="公告管理"></a>
+        <span>公告數</span><strong data-count="{{ stats.announcements }}">{{ stats.announcements }}</strong>
+    </article>
+</section>
+
+<section class="admin-columns">
+    <article class="admin-panel" data-reveal>
+        <div class="panel-heading">
+            <h2>近期訂位</h2>
+            <a href="{{ url_for('admin_reservations') }}">查看全部</a>
+        </div>
+        {% if upcoming_reservations %}
+            <div class="admin-list">
+                {% for item in upcoming_reservations %}
+                <div>
+                    <strong>{{ item.reserved_date }} {{ item.reserved_time }}</strong>
+                    <span>{{ item.name }}，{{ item.party_size }} 位，{{ item.status }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="muted">目前沒有近期訂位。</p>
+        {% endif %}
+    </article>
+    <article class="admin-panel" data-reveal data-reveal-delay="1">
+        <div class="panel-heading">
+            <h2>近期留言</h2>
+            <a href="{{ url_for('admin_messages') }}">管理留言</a>
+        </div>
+        {% if recent_messages %}
+            <div class="admin-list">
+                {% for msg in recent_messages %}
+                <div>
+                    <strong>{{ msg.name }}{% if msg.status == 'unread' %}，未讀{% endif %}</strong>
+                    <span>{{ msg.subject or msg.body[:24] }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="muted">目前沒有新的留言。</p>
+        {% endif %}
+    </article>
+</section>
+
+{% if low_stock %}
+<section class="admin-panel low-stock-panel" data-reveal>
+    <div class="panel-heading">
+        <h2>低庫存提醒</h2>
+        <a href="{{ url_for('admin_products') }}">管理菜單</a>
+    </div>
+    <div class="admin-list">
+        {% for product in low_stock %}
+        <div>
+            <strong>{{ product.name }}</strong>
+            <span>庫存 {{ product.stock }} 份</span>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

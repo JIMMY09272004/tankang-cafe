@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}找不到頁面 - {{ brand.name }}{% endblock %}
+{% block body_class %}public-page error-page{% endblock %}
+
+{% block content %}
+<section class="hero error-hero" data-reveal>
+    <div class="hero-copy">
+        <span class="section-kicker">404</span>
+        <h1>這個頁面不存在</h1>
+        <p>你可以回到首頁，或查看菜單。</p>
+        <div class="hero-actions">
+            <a class="button primary glass" href="{{ url_for('home') }}">回首頁</a>
+            <a class="button glass" href="{{ url_for('shop') }}">查看菜單</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

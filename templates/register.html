@@ -1,0 +1,37 @@
+﻿{% extends "base.html" %}
+
+{% block title %}註冊會員 - {{ brand.name }}{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<section class="auth-shell wide-auth">
+    <div class="auth-visual" data-reveal>
+        <span class="section-kicker">Create Account</span>
+        <h1>加入{{ brand.name }}</h1>
+        <p>填好資料後，請到信箱點選驗證連結。完成驗證，就能登入會員。</p>
+    </div>
+    <form class="auth-card" method="post" action="{{ url_for('register') }}" data-reveal data-reveal-delay="1">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-heading">
+            <span class="section-kicker">Member Profile</span>
+            <h2>註冊會員</h2>
+        </div>
+        <div class="form-row">
+            <label><span>姓名</span><input type="text" name="full_name" required maxlength="60" autocomplete="name"></label>
+            <label><span>生日</span><input type="date" name="birthday" required></label>
+        </div>
+        <label><span>Email</span><input type="email" name="email" required maxlength="120" autocomplete="email"></label>
+        <label><span>帳號</span><input type="text" name="username" required maxlength="60" autocomplete="username"></label>
+        <div class="form-row">
+            <label><span>密碼</span><input type="password" name="password" required autocomplete="new-password" data-password-rule></label>
+            <label><span>密碼確認</span><input type="password" name="password_confirm" required autocomplete="new-password"></label>
+        </div>
+        <p class="help-text">密碼至少 8 碼，且需包含大寫英文、小寫英文與數字。</p>
+        {% if turnstile_enabled %}
+            <div class="turnstile-wrap"><div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}" data-action="register" data-theme="dark"></div></div>
+        {% endif %}
+        <button class="button primary full" type="submit">建立帳號</button>
+        <div class="auth-links"><a href="{{ url_for('login') }}">已有帳號，前往登入</a></div>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}最新消息 - {{ brand.name }}{% endblock %}
+{% block body_class %}public-page news-page{% endblock %}
+
+{% block content %}
+<section class="page-hero news-hero">
+    <div data-reveal>
+        <span class="section-kicker">Latest News</span>
+        <h1>最新消息</h1>
+        <p>豆單、營業時段、限定甜點與夜間座位資訊，都會在這裡更新。</p>
+    </div>
+</section>
+
+<section class="news-list">
+    {% for item in announcements %}
+    <article class="news-row" data-reveal data-reveal-delay="{{ loop.index0 }}">
+        <time>
+            <strong>{{ item.created_at[8:10] if item.created_at|length >= 10 else loop.index }}</strong>
+            <span>{{ item.created_at[:7] }}</span>
+        </time>
+        <div>
+            {% if item.pinned %}<span class="pill news-pin">置頂消息</span>{% endif %}
+            <h2>{{ item.title }}</h2>
+            <p>{{ item.body[:130] }}{% if item.body|length > 130 %}...{% endif %}</p>
+        </div>
+        <a class="button glass" href="{{ url_for('news_detail', announcement_id=item.id) }}">閱讀更多</a>
+    </article>
+    {% else %}
+    <div class="empty-state">
+        <h2>目前尚無消息</h2>
+        <p>最新活動與營業資訊會在這裡公布。</p>
+    </div>
+    {% endfor %}
+</section>
+{% endblock %}

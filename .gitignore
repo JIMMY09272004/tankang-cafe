@@ -1,0 +1,51 @@
+# Credentials and private configuration
+.env
+.env.*
+!.env.example
+admin.py
+*.pem
+*.key
+*.pfx
+*.p12
+
+# All real data, generated previews, logs and local backups
+data/
+backup/
+backups/
+backup_start_files/
+demo_render/
+logs/
+run/
+*.sqlite*
+*.db
+*.db-*
+*.log
+static/images/uploads/
+
+# Reproducible build output and dependencies
+_site/
+static/dist/
+node_modules/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# Local tooling and operating system files
+.agents/
+.claude/
+.codex/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# These deployment scripts belong to the private machine/router setup.
+start.bat
+stop.bat
+scripts/*router*.ps1
+scripts/*managed*.ps1
+scripts/start_tunnel*.ps1

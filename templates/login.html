@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}會員登入 - {{ brand.name }}{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<section class="auth-shell">
+    <div class="auth-visual" data-reveal>
+        <span class="section-kicker">Member Access</span>
+        <h1>歡迎回到{{ brand.name }}</h1>
+        <p>登入後可更新會員資料與密碼。第一次來？歡迎註冊帳號。</p>
+    </div>
+    <form class="auth-card" method="post" action="{{ url_for('login', next=request.args.get('next', '')) }}" data-reveal data-reveal-delay="1">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-heading">
+            <span class="section-kicker">Secure Sign In</span>
+            <h2>登入帳號</h2>
+        </div>
+        <label>
+            <span>帳號</span>
+            <input type="text" name="username" autocomplete="username" required maxlength="60">
+        </label>
+        <label>
+            <span>密碼</span>
+            <input type="password" name="password" autocomplete="current-password" required>
+        </label>
+        {% if turnstile_enabled %}
+            <div class="turnstile-wrap"><div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}" data-action="login" data-theme="dark"></div></div>
+        {% endif %}
+        <button class="button primary full" type="submit">登入</button>
+        <div class="auth-links">
+            <a href="{{ url_for('register') }}">註冊會員</a>
+            <a href="{{ url_for('forgot_password') }}">忘記密碼</a>
+        </div>
+        {% if unverified_email %}
+            <div class="auth-links"><a href="{{ url_for('resend_verification') }}">重新寄送驗證信</a></div>
+        {% endif %}
+    </form>
+</section>
+{% endblock %}

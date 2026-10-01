@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}菜單 - {{ brand.name }}{% endblock %}
+{% block body_class %}public-page menu-page{% endblock %}
+
+{% block content %}
+<section class="page-hero menu-hero">
+    <div data-reveal>
+        <span class="section-kicker">Menu</span>
+        <h1>{{ brand.name }}菜單</h1>
+        <p>選一杯喜歡的咖啡，再搭份甜點或輕食。</p>
+    </div>
+</section>
+
+<section class="shop-toolbar" data-reveal>
+    <label>
+        <span>搜尋</span>
+        <input type="search" placeholder="輸入咖啡、甜點或風味" data-product-search>
+    </label>
+    <label>
+        <span>分類</span>
+        <select data-product-filter>
+            <option value="all">全部分類</option>
+            {% for category in categories %}
+                <option value="{{ category }}">{{ category }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <label>
+        <span>排序</span>
+        <select data-product-sort>
+            <option value="featured">推薦優先</option>
+            <option value="price-asc">價格由低到高</option>
+            <option value="price-desc">價格由高到低</option>
+            <option value="name">名稱排序</option>
+        </select>
+    </label>
+</section>
+
+<section class="product-grid menu-grid" data-product-grid>
+    {% for product in products %}
+    <article class="product-card menu-card"
+        data-product-card
+        data-slug="{{ product.slug }}"
+        data-product-url="{{ url_for('product_detail', slug=product.slug) }}"
+        data-name="{{ product.name|e }}"
+        data-category="{{ product.category|e }}"
+        data-description="{{ product.description|e }}"
+        data-price="{{ product.price }}"
+        data-featured="{{ 1 if product.featured else 0 }}"
+        data-image="{{ product.image_url }}">
+        <div class="product-media">
+            <img src="{{ product.image_url }}" alt="{{ product.name }}">
+            <button class="quick-button" type="button" data-quick-view aria-label="快速預覽 {{ product.name }}">預覽</button>
+        </div>
+        <div class="product-content">
+            <span>{{ product.category }}</span>
+            <h2>{{ product.name }}</h2>
+            <p>{{ product.description }}</p>
+            <div class="product-bottom">
+                <strong>NT${{ product.price }}</strong>
+                <a class="button glass" href="{{ url_for('product_detail', slug=product.slug) }}">查看詳情</a>
+            </div>
+        </div>
+    </article>
+    {% endfor %}
+</section>
+
+<aside class="quick-view" data-quick-panel aria-hidden="true">
+    <button class="quick-close" type="button" data-quick-close aria-label="關閉預覽"></button>
+    <img src="" alt="" data-quick-image>
+    <span data-quick-category></span>
+    <h2 data-quick-name></h2>
+    <p data-quick-description></p>
+    <div class="quick-actions">
+        <a class="button primary" href="#" data-quick-link>查看詳情</a>
+        {% if not pages_mode %}<a class="button glass" href="{{ url_for('reservation') }}">預約訂位</a>{% endif %}
+    </div>
+</aside>
+{% endblock %}

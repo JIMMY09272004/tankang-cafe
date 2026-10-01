@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}請驗證 Email - {{ brand.name }}{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<section class="auth-shell">
+    <div class="auth-visual" data-reveal>
+        <span class="section-kicker">Email Verification</span>
+        <h1>請前往信箱完成驗證。</h1>
+        <p>完成驗證後，會員帳號才能登入使用。</p>
+    </div>
+    <div class="auth-card" data-reveal data-reveal-delay="1">
+        <div class="form-heading">
+            <span class="section-kicker">Next Step</span>
+            <h2>驗證信已送出</h2>
+        </div>
+        {% if email %}
+            <p class="help-text">驗證信已寄送至 {{ email }}。</p>
+        {% endif %}
+        <p>若沒有收到，請檢查垃圾信件匣，或重新寄送驗證信。</p>
+        <div class="auth-links">
+            <a href="{{ url_for('resend_verification') }}">重新寄送驗證信</a>
+            <a href="{{ url_for('login') }}">返回登入</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}留言管理 - {{ brand.name }}{% endblock %}
+{% block body_class %}admin-page{% endblock %}
+
+{% set status_labels = {'unread': '未讀', 'read': '已讀', 'archived': '已封存'} %}
+
+{% block content %}
+<section class="admin-hero" data-reveal>
+    <div>
+        <span class="section-kicker">Message Center</span>
+        <h1>留言管理</h1>
+        <p>查看前台聯絡表單送出的訊息，更新閱讀狀態或刪除無效紀錄。</p>
+    </div>
+</section>
+
+<section class="admin-panel">
+    <div class="panel-heading filter-bar">
+        <div class="status-filter">
+            <a class="chip {% if not status_filter %}active{% endif %}" href="{{ url_for('admin_messages') }}">全部</a>
+            {% for status in statuses %}
+                <a class="chip {% if status_filter == status %}active{% endif %}" href="{{ url_for('admin_messages', status=status) }}">{{ status_labels[status] }}</a>
+            {% endfor %}
+        </div>
+        <input type="search" placeholder="搜尋姓名、主旨或內容" data-admin-search>
+    </div>
+
+    {% if messages %}
+    <div class="order-list">
+        {% for msg in messages %}
+        <article class="order-card {% if msg.status == 'unread' %}is-unread{% endif %}" data-reveal data-admin-product data-name="{{ msg.name }} {{ msg.subject }} {{ msg.body }}">
+            <div class="order-topline">
+                <div>
+                    <span class="pill status-pill status-{{ msg.status }}">{{ status_labels[msg.status] }}</span>
+                    <h2>{{ msg.subject or '未填寫主旨' }}</h2>
+                    <p>{{ msg.name }}{% if msg.email %}，{{ msg.email }}{% endif %}{% if msg.phone %}，{{ msg.phone }}{% endif %}</p>
+                </div>
+                <span class="small-text muted">{{ msg.created_at }}</span>
+            </div>
+            <p class="message-body">{{ msg.body }}</p>
+            <div class="card-actions">
+                <form class="status-form" method="post" action="{{ url_for('admin_message_status', message_id=msg.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <select name="status">
+                        {% for status in statuses %}
+                            <option value="{{ status }}" {% if msg.status == status %}selected{% endif %}>{{ status_labels[status] }}</option>
+                        {% endfor %}
+                    </select>
+                    <button class="button glass" type="submit">更新狀態</button>
+                </form>
+                {% if msg.email %}
+                <a class="button glass" href="mailto:{{ msg.email }}{% if msg.subject %}?subject=Re: {{ msg.subject }}{% endif %}">回覆 Email</a>
+                {% endif %}
+                <form method="post" action="{{ url_for('admin_message_delete', message_id=msg.id) }}" onsubmit="return confirm('確定要刪除這則留言嗎？');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="button danger" type="submit">刪除</button>
+                </form>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h2>目前沒有留言</h2>
+        <p>前台聯絡表單送出的內容會顯示在這裡。</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

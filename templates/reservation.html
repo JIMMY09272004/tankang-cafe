@@ -1,0 +1,50 @@
+﻿{% extends "base.html" %}
+
+{% block title %}預約訂位 - {{ brand.name }}{% endblock %}
+{% block body_class %}public-page form-page reservation-page{% endblock %}
+
+{% block content %}
+<section class="page-hero reservation-hero">
+    <div data-reveal>
+        <span class="section-kicker">Reservation</span>
+        <h1>預約訂位</h1>
+        <p>留下用餐日期、時間和人數，我們會回覆座位安排。收到確認後，訂位才算完成。</p>
+    </div>
+</section>
+
+<section class="form-layout">
+    <form class="form-panel" method="post" action="{{ url_for('reservation') }}" data-reveal>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-heading">
+            <span class="section-kicker">Book a table</span>
+            <h2>留下訂位資訊</h2>
+        </div>
+        <div class="form-row">
+            <label><span>姓名</span><input type="text" name="name" required maxlength="60" autocomplete="name"></label>
+            <label><span>聯絡電話</span><input type="tel" name="phone" required maxlength="20" autocomplete="tel"></label>
+        </div>
+        <label><span>Email</span><input type="email" name="email" maxlength="120" autocomplete="email"></label>
+        <div class="form-row">
+            <label><span>人數</span><input type="number" name="party_size" min="1" max="50" required></label>
+            <label><span>日期</span><input type="date" name="reserved_date" min="{{ today }}" required></label>
+            <label><span>時間</span><input type="time" name="reserved_time" min="11:00" max="22:00" required></label>
+        </div>
+        <label><span>備註</span><textarea name="note" rows="4" maxlength="240" placeholder="例如靠窗座位、生日聚會或特殊飲食需求"></textarea></label>
+        {% if turnstile_enabled %}
+            <div class="turnstile-wrap"><div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}" data-action="reservation" data-theme="dark"></div></div>
+        {% endif %}
+        <button class="button primary full" type="submit">送出訂位</button>
+    </form>
+
+    <aside class="info-panel" data-reveal data-reveal-delay="1">
+        <span class="section-kicker" data-edit-key="reservation.notice.kicker">{{ ed('reservation.notice.kicker', 'Before Visit') }}</span>
+        <h2 data-edit-key="reservation.notice.title">{{ ed('reservation.notice.title', '訂位提醒') }}</h2>
+        <p data-edit-key="reservation.notice.copy">{{ ed('reservation.notice.copy', '送出表單後，請等候我們回覆。座位以店家確認為準。') }}</p>
+        <ul>
+            <li><span data-edit-key="reservation.notice.hours">{{ ed('reservation.notice.hours', '營業時間：11:00 至 22:00') }}</span></li>
+            <li><span data-edit-key="reservation.notice.advance">{{ ed('reservation.notice.advance', '晚間座位建議提前一天預約') }}</span></li>
+            <li><span data-edit-key="reservation.notice.large_party">{{ ed('reservation.notice.large_party', '超過 10 人的聚會，建議先聯絡我們討論安排') }}</span></li>
+        </ul>
+    </aside>
+</section>
+{% endblock %}
