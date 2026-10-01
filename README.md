@@ -2,8 +2,6 @@
 
 <img src="static/images/tankang-cafe-logo.png" alt="淡江咖啡館標誌" width="160">
 
-咖啡館網站專案，使用繁體中文，包含黑金版型、玻璃按鈕、首頁輪播、菜單搜尋與快速預覽。支援手機、平板與桌面版面。
-
 ## 線上展示
 
 展示網址列在此 repository 首頁的 **About → Website**。
