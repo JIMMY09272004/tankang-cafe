@@ -6,7 +6,7 @@
 
 ## 線上展示
 
-[瀏覽淡江咖啡館](https://JIMMY09272004.github.io/tankang-cafe/)
+展示網址列在此 repository 首頁的 **About → Website**。
 
 GitHub Pages 提供首頁、菜單、商品介紹及示範消息。不提供會員登入、寄信、訂位提交或後台。價格、消息、店內照片為展示用內容，圖片包含 AI 生成素材，不代表實際店址或供應狀況。
 
@@ -40,7 +40,7 @@ python build_pages.py --base-path /tankang-cafe --output _site/github-preview
 
 `.github/workflows/pages.yml` 會在推送至 `main` 時執行測試、建置壓縮與混淆資源，再將靜態展示頁部署到 GitHub Pages。只發布 `_site/`，不發布原始碼、設定檔或資料庫。
 
-複製到自己的 repository 後，在 **Settings → Pages → Build and deployment** 選擇 **GitHub Actions**。部署時會自動使用該 repository 的路徑。
+複製到自己的 repository 後，在 **Settings → Pages → Build and deployment** 選擇 **GitHub Actions**。部署時會自動使用 GitHub Pages 提供的網站路徑，支援專案路徑或網站根目錄。
 
 ## 完整 Flask 後端
 

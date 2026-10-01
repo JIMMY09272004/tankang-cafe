@@ -15,8 +15,14 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Read GitHub Pages path
+        id: pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.12'
@@ -31,8 +37,8 @@ jobs:
       - run: python build_assets.py
       - name: Build isolated public pages
         env:
-          REPOSITORY_NAME: ${{ github.event.repository.name }}
-        run: python build_pages.py --base-path "/$REPOSITORY_NAME"
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: python build_pages.py --base-path "$PAGES_BASE_PATH"
       - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
         with:
           path: _site
